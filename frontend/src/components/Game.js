@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Button from "./Button";
+import PostDataGame from "./PostDataGame";
+import checkUserApi from "../api/checkUserApi";
 
 const Game = () => {
   const [guessNumber, setGuessNumber] = useState(0);
   const dispatch = useDispatch();
-  const username = useSelector((state) => state.userReducer.name);
   const guessInfo = useSelector((state) => state.gameReducer);
-  const guessN = useSelector((state) => state.gameReducer);
-  //duoc mount vao trang web thi dung useEffect de check co trong database khong
-  console.log(guessN);
+  const userInfo = useSelector((state) => state.userReducer);
   const handleInputNumber = (e) => {
     const num = parseInt(e.target.value);
     if (num > 1000) return setGuessNumber(1000);
@@ -17,21 +16,11 @@ const Game = () => {
     if (isNaN(num)) return setGuessNumber(0);
     return setGuessNumber(num);
   };
-
+  console.log(guessInfo);
   return (
     <div className="space-y-4">
-      {/* neu co user trong database roi in ra ten so game da choi thanh tich tot nhat */}
       <div>
-        <code>
-          Welcome back, {username}! You have played $GAME_PLAYED games, and your
-          best game took $BEST_GAME guesses.
-        </code>
-      </div>
-      {/* neu chua co user trong database */}
-      <div>
-        <code>
-          Welcome, {username}! It looks like this is your first time here.
-        </code>
+        <code>{userInfo.user_info}</code>
       </div>
       <div>
         <code>Guess the secret number between 1 and 1000:</code>
@@ -53,7 +42,8 @@ const Game = () => {
           }
           onClick={() => {
             dispatch({ type: "RESTART" });
-            setGuessNumber(0)
+            setGuessNumber(0);
+            checkUserApi(userInfo.name, dispatch);
           }}
         >
           Restart
@@ -73,12 +63,13 @@ const Game = () => {
       <div>
         <code>
           {guessInfo.guessStatus === 0
-            ? `You guessed it in ${guessInfo.guessCount} tries. The secret number was ${guessInfo.numberGuess}. Nice job!`
+            ? `You guessed it in ${guessInfo.guessCount} tries. The secret number was ${guessInfo.secretNumber}. Nice job!`
             : guessInfo.guessStatus === -1
             ? "It's higher than that, guess again:"
             : guessInfo.guessStatus === 1
             ? "It's lower than that, guess again:"
             : ""}
+          {guessInfo.guessStatus === 0 ? <PostDataGame /> : ""}
         </code>
       </div>
     </div>
